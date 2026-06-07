@@ -2,51 +2,60 @@ package main
 
 import (
 	"fmt"
-	"go-digital-library/internal/books"
+	"go-digital-library/internal/users"
 )
 
 func main() {
-	bookService := books.NewBookService()
+	userService := users.NewUserService()
 
-	libro1, err := bookService.RegistrarLibro("Clean Code", "Robert Martin", "Programacion", 2008)
+	usuario1, err := userService.RegistrarUsuario("Jose", "jose@email.com")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
-	libro2, err := bookService.RegistrarLibro("El Principito", "Antoine de Saint-Exupery", "Literatura", 1943)
+	usuario2, err := userService.RegistrarUsuario("Ana", "ana@email.com")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
-	fmt.Println("Libros registrados:")
-	fmt.Println(libro1.ID(), "-", libro1.Titulo())
-	fmt.Println(libro2.ID(), "-", libro2.Titulo())
+	fmt.Println("Usuarios registrados:")
+	fmt.Println(usuario1.ID(), "-", usuario1.Nombre(), "-", usuario1.Correo())
+	fmt.Println(usuario2.ID(), "-", usuario2.Nombre(), "-", usuario2.Correo())
 
-	fmt.Println("\nListado completo")
-	for _, libro := range bookService.ListarLibros() {
-		fmt.Println("Encontrado:", libro.Titulo())
+	fmt.Println("\nListado completo:")
+	for _, usuario := range userService.ListarUsuarios() {
+		fmt.Println(usuario.ID(), usuario.Nombre(), "-", usuario.Correo(), "- Activo:", usuario.Activo())
 	}
 
-	fmt.Println("\nBusqueda por texto: programacion")
-	resultados := bookService.BuscarPorTexto("programacion")
-	for _, libro := range resultados {
-		fmt.Println("Encontrado:", libro.Titulo())
+	fmt.Println("\nBusqueda por correo:")
+	usuarioBuscado, err := userService.BuscarPorCorreo("jose@email.com")
+	if err != nil {
+		fmt.Println("Error, err")
+		return
+	}
+	fmt.Println("Encontrado:", usuarioBuscado.Nombre())
+
+	fmt.Println("\nBusqueda por texto: ana")
+	resultados := userService.BuscarPorTexto("ana")
+	for _, usuario := range resultados {
+		fmt.Println("Encontrado:", usuario.Nombre(), "-", usuario.Correo())
 	}
 
-	err = bookService.PrestarLibro(1)
+	err = userService.DesactivarUsuario(1)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
-	libroBuscado, err := bookService.BuscarPorID(1)
+	usuarioDesactivado, err := userService.BuscarPorID(1)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
-	fmt.Println("\nLibro prestado:", libroBuscado.Titulo())
-	fmt.Println("Disponible:", libroBuscado.Disponible())
+	fmt.Println("\nUsuario desactivado:", usuarioDesactivado.Nombre())
+	fmt.Println("Activo:", usuarioDesactivado.Activo())
+
 }
