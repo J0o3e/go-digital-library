@@ -279,10 +279,22 @@ func (m *Menu) listarPrestamosActivos() {
 	}
 
 	for _, prestamo := range prestamos {
+		libro, err := m.bookService.BuscarPorID(prestamo.LibroID())
+		if err != nil {
+			fmt.Println("Error al buscar libro del prestamo:", err)
+			continue
+		}
+
+		usuario, err := m.userService.BuscarPorID(prestamo.UsuarioID())
+		if err != nil {
+			fmt.Println("Error al buscar usuario del prestamo:", err)
+			continue
+		}
+
 		fmt.Println(
 			"ID:", prestamo.ID(),
-			"| Libro ID:", prestamo.LibroID(),
-			"| Usuario ID:", prestamo.UsuarioID(),
+			"| Libro:", libro.Titulo(),
+			"| Usuario:", usuario.Nombre(),
 			"| Activo:", prestamo.Activo(),
 		)
 	}
