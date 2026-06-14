@@ -45,6 +45,10 @@ func main() {
 		case 7:
 			devolverPrestamo(reader, loanService)
 		case 8:
+			buscarLibros(reader, bookService)
+		case 9:
+			buscarUsuarios(reader, userService)
+		case 10:
 			fmt.Println("Saliendo del sistema...")
 			return
 		default:
@@ -62,7 +66,9 @@ func mostrarMenu() {
 	fmt.Println("5. Registar prestamo")
 	fmt.Println("6. Listar prestamos activos")
 	fmt.Println("7. Devolver prestamo")
-	fmt.Println("8. Salir")
+	fmt.Println("8. Buscar libros")
+	fmt.Println("9. Buscar usuarios")
+	fmt.Println("10. Salir")
 }
 
 func leerTexto(reader *bufio.Reader, mensaje string) string {
@@ -130,6 +136,34 @@ func listarLibros(bookService *books.BookService) {
 	}
 }
 
+func buscarLibros(reader *bufio.Reader, bookService *books.BookService) {
+	fmt.Println("\n--- Buscar libros ---")
+
+	texto := leerTexto(reader, "Ingresar titulo, autor o categoria: ")
+	resultados := bookService.BuscarPorTexto(texto)
+
+	if len(resultados) == 0 {
+		fmt.Println("No se encontraron libros.")
+		return
+	}
+
+	for _, libro := range resultados {
+		estado := "Disponible"
+		if !libro.Disponible() {
+			estado = "Prestado"
+		}
+
+		fmt.Println(
+			"ID:", libro.ID(),
+			"| Titulo:", libro.Titulo(),
+			"| Autor:", libro.Autor(),
+			"| Categoria:", libro.Categoria(),
+			"| Anio:", libro.Anio(),
+			"| Estado:", estado,
+		)
+	}
+}
+
 func registrarUsuario(reader *bufio.Reader, userService *users.UserService) {
 	fmt.Println("\n--- Registrar usuario ---")
 
@@ -156,6 +190,32 @@ func listarUsuarios(userService *users.UserService) {
 	}
 
 	for _, usuario := range usuarios {
+		estado := "Activo"
+		if !usuario.Activo() {
+			estado = "Inactivo"
+		}
+
+		fmt.Println(
+			"ID:", usuario.ID(),
+			"| Nombre:", usuario.Nombre(),
+			"| Correo:", usuario.Correo(),
+			"| Estado:", estado,
+		)
+	}
+}
+
+func buscarUsuarios(reader *bufio.Reader, userService *users.UserService) {
+	fmt.Println("\n--- Buscar usuarios ---")
+
+	texto := leerTexto(reader, "Ingrese nombre o correo: ")
+	resultados := userService.BuscarPorTexto(texto)
+
+	if len(resultados) == 0 {
+		fmt.Println("No se encontraron usuarios.")
+		return
+	}
+
+	for _, usuario := range resultados {
 		estado := "Activo"
 		if !usuario.Activo() {
 			estado = "Inactivo"
