@@ -1,168 +1,75 @@
-\# Go Digital Library
-
-
-
-Sistema de Biblioteca Digital desarrollado en Go con conexión a PostgreSQL.
-
-
-
-\## Descripción
-
-
-
-Este proyecto tiene como objetivo desarrollar una biblioteca digital usando el lenguaje de programación Go. El sistema permitirá gestionar libros, usuarios y préstamos, almacenando la información en una base de datos externa PostgreSQL.
-
-
-
-\## Objetivo general
-
-
-
-Desarrollar un sistema de Biblioteca Digital en Go que permita registrar, consultar, buscar, prestar y devolver libros, usando PostgreSQL como base de datos externa.
-
-
-
-\## Módulos del sistema
-
-
-
-\- Gestión de libros
-
-\- Gestión de usuarios
-
-\- Gestión de préstamos
-
-\- Gestión de validaciones
-
-\- Conexión a PostgreSQL
-
-\- Acceso a datos
-
-\- Interfaz por consola
-
-
-
-\## Temas aplicados de la Unidad 1
-
-
-
-\- Condicionales `if` e `if else`
-
-\- Estructura `switch`
-
-\- Bucle `for`
-
-\- Funciones con y sin parámetros
-
-\- Funciones con uno o varios retornos
-
-\- Uso de punteros
-
-
-
-\## Tecnologías utilizadas
-
-
-
-\- Go
-
-\- PostgreSQL
-
-\- Git
-
-\- GitHub
-
-
-
-\## Paquetes principales
-
-
-
-\### Paquetes estándar de Go
-
-
-
-\- `fmt`
-
-\- `bufio`
-
-\- `os`
-
-\- `strings`
-
-\- `strconv`
-
-\- `time`
-
-\- `context`
-
-\- `database/sql`
-
-\- `errors`
-
-
-
-\### Paquete externo
-
-
-
-\- `github.com/jackc/pgx/v5`
-
-
-
-\## Estructura del proyecto
-
-
+# Go Digital Library
+
+Go Digital Library es un sistema de biblioteca digital desarrollado en el lenguaje Go.
+
+El proyecto permite registrar libros, registrar usuarios, realizar préstamos, devolver libros, buscar información y consultar el historial de préstamos. Los datos se almacenan de forma persistente en una base de datos PostgreSQL.
+
+## Objetivo del proyecto
+
+El objetivo principal del proyecto es aplicar conceptos de programación orientada a objetos y estructuras de datos usando Go, organizando el sistema en paquetes y separando responsabilidades.
+
+El proyecto aplica conceptos como:
+
+- Structs
+- Métodos
+- Constructores
+- Encapsulación
+- Punteros
+- Slices
+- Maps
+- Funciones
+- Manejo de errores
+- Condicionales `if`
+- Ciclos `for`
+- Estructura `switch`
+- Conexión a base de datos PostgreSQL
+
+## Tecnologías utilizadas
+
+- Go
+- PostgreSQL
+- pgx
+- godotenv
+- Git
+- GitHub
+- Visual Studio Code
+
+## Funcionalidades principales
+
+El sistema permite:
+
+- Registrar libros.
+- Listar libros.
+- Buscar libros por título, autor o categoría.
+- Registrar usuarios.
+- Listar usuarios.
+- Buscar usuarios por nombre o correo.
+- Registrar préstamos.
+- Listar préstamos activos.
+- Devolver préstamos.
+- Consultar historial de préstamos.
+
+## Arquitectura del proyecto
+
+El proyecto está organizado en paquetes para separar responsabilidades:
 
 ```text
-
 go-digital-library/
-
-│
-
 ├── cmd/
-
 │   └── app/
-
 │       └── main.go
-
-│
-
 ├── internal/
-
-│   ├── models/
-
-│   ├── console/
-
 │   ├── books/
-
-│   ├── users/
-
-│   ├── loans/
-
+│   ├── config/
+│   ├── console/
 │   ├── database/
-
+│   ├── loans/
+│   ├── models/
 │   ├── repositories/
-
-│   └── validations/
-
-│
-
+│   └── users/
 ├── docs/
-
 ├── scripts/
-
-├── .gitignore
-
 ├── .env.example
-
-├── README.md
-
-└── go.mod
-
-## Ejecución del proyecto
-
-Las instrucciones para instalar, configurar PostgreSQL, crear las tablas, configurar variables de entorno y ejecutar el sistema se encuentran en:
-
-[docs/ejecucion.md](docs/ejecucion.md)
+├── go.mod
+└── README.md
 
