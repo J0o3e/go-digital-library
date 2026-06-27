@@ -63,6 +63,8 @@ func (m *Menu) Ejecutar() {
 		case 9:
 			m.buscarUsuarios()
 		case 10:
+			m.listarHistorialPrestamos()
+		case 11:
 			fmt.Println("Saliendo del sistema...")
 			return
 		default:
@@ -82,7 +84,8 @@ func (m *Menu) mostrarMenu() {
 	fmt.Println("7. Devolver prestamo")
 	fmt.Println("8. Buscar libros")
 	fmt.Println("9. Buscar usuarios")
-	fmt.Println("10. Salir")
+	fmt.Println("10. Historial de prestamos")
+	fmt.Println("11. Salir")
 }
 
 func (m *Menu) leerTexto(mensaje string) string {
@@ -296,6 +299,51 @@ func (m *Menu) listarPrestamosActivos() {
 			"| Libro:", libro.Titulo(),
 			"| Usuario:", usuario.Nombre(),
 			"| Activo:", prestamo.Activo(),
+		)
+	}
+}
+
+func (m *Menu) listarHistorialPrestamos() {
+	fmt.Println("\n--- Historial de prestamos ---")
+
+	prestamos := m.loanService.ListarPrestamos()
+	if len(prestamos) == 0 {
+		fmt.Println("No hay prestamos registrados")
+		return
+	}
+
+	for _, prestamo := range prestamos {
+		libro, err := m.bookService.BuscarPorID(prestamo.LibroID())
+		if err != nil {
+			fmt.Println("error al buscar el libro del prestamo", err)
+			continue
+		}
+
+		usuario, err := m.userService.BuscarPorID(prestamo.UsuarioID())
+		if err != nil {
+			fmt.Println("Error al buscar usuario del prestamo:", err)
+			continue
+		}
+
+		estado := "Activo"
+		if !prestamo.Activo() {
+			estado = "Devuelto"
+		}
+
+		fechaPrestamo := prestamo.FechaPrestamo().Format("2006-01-02 15:04")
+
+		fechaDevolucion := "Pendiente"
+		if prestamo.FechaDevolucion() != nil {
+			fechaDevolucion = prestamo.FechaDevolucion().Format("2006-01-02 15:04")
+		}
+
+		fmt.Println(
+			"ID:", prestamo.ID(),
+			"| Libro:", libro.Titulo(),
+			"| Usuario:", usuario.Nombre(),
+			"| Fecha prestamo:", fechaPrestamo,
+			"| Fecha devolucion:", fechaDevolucion,
+			"| Estado:", estado,
 		)
 	}
 }
