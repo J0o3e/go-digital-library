@@ -160,3 +160,9 @@ go-digital-library/
 
 └── go.mod
 
+## Ejecución del proyecto
+
+Las instrucciones para instalar, configurar PostgreSQL, crear las tablas, configurar variables de entorno y ejecutar el sistema se encuentran en:
+
+[docs/ejecucion.md](docs/ejecucion.md)
+
