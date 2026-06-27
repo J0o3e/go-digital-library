@@ -176,32 +176,37 @@ func escanearPrestamo(scanner scannerPrestamo) (*models.Prestamo, error) {
 	var id int
 	var libroID int
 	var usuarioID int
-	var fecha_prestamo time.Time
-	var fecha_devolucion sql.NullTime
+	var fechaPrestamo time.Time
+	var fechaDevolucion sql.NullTime
 	var activo bool
 
 	err := scanner.Scan(
 		&id,
 		&libroID,
 		&usuarioID,
-		&fecha_prestamo,
-		&fecha_devolucion,
+		&fechaPrestamo,
+		&fechaDevolucion,
 		&activo,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	prestamo, err := models.NuevoPrestamo(id, libroID, usuarioID)
-	if err != nil {
-		return nil, err
+	var fechaDevolucionPtr *time.Time
+	if fechaDevolucion.Valid {
+		fechaDevolucionPtr = &fechaDevolucion.Time
 	}
 
-	if !activo {
-		err = prestamo.Devolver()
-		if err != nil {
-			return nil, err
-		}
+	prestamo, err := models.NuevoPrestamoDesdeBD(
+		id,
+		libroID,
+		usuarioID,
+		fechaPrestamo,
+		fechaDevolucionPtr,
+		activo,
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	return prestamo, nil

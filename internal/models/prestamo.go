@@ -39,6 +39,50 @@ func NuevoPrestamo(id int, libroID int, usuarioID int) (*Prestamo, error) {
 	return prestamo, nil
 }
 
+func NuevoPrestamoDesdeBD(
+	id int,
+	libroID int,
+	usuarioID int,
+	fechaPrestamo time.Time,
+	fechaDevolucion *time.Time,
+	activo bool,
+) (*Prestamo, error) {
+	if id <= 0 {
+		return nil, errors.New("El ID del presatmo debe ser mayor a cero")
+	}
+
+	if libroID <= 0 {
+		return nil, errors.New("El ID del libro debe ser mayor a cero")
+	}
+
+	if usuarioID <= 0 {
+		return nil, errors.New("El ID del usuario deber ser mayor a cero")
+	}
+
+	if fechaPrestamo.IsZero() {
+		return nil, errors.New("El ID del prestamo no puede estar vacio")
+	}
+
+	if activo && fechaDevolucion != nil {
+		return nil, errors.New("Un prestamo activo no debe tener fecha de devolucion")
+	}
+
+	if !activo && fechaDevolucion == nil {
+		return nil, errors.New("Un prestamo devuelto debe tener fecha de devolucion")
+	}
+
+	prestamo := &Prestamo{
+		id:              id,
+		libroID:         libroID,
+		usuarioID:       usuarioID,
+		fechaPrestamo:   fechaPrestamo,
+		fechaDevolucion: fechaDevolucion,
+		activo:          activo,
+	}
+
+	return prestamo, nil
+}
+
 func (p *Prestamo) ID() int {
 	return p.id
 }
