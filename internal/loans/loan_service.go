@@ -5,6 +5,7 @@ import (
 
 	"go-digital-library/internal/books"
 	"go-digital-library/internal/models"
+	"go-digital-library/internal/repositories"
 	"go-digital-library/internal/users"
 )
 
@@ -15,6 +16,7 @@ type LoanService struct {
 	siguienteID            int
 	bookService            *books.BookService
 	userService            *users.UserService
+	loanRepository         *repositories.LoanRepository
 }
 
 func NewLoanService(bookService *books.BookService, userService *users.UserService) *LoanService {
@@ -25,6 +27,23 @@ func NewLoanService(bookService *books.BookService, userService *users.UserServi
 		siguienteID:            1,
 		bookService:            bookService,
 		userService:            userService,
+		loanRepository:         nil,
+	}
+}
+
+func NewLoanDBService(
+	bookService *books.BookService,
+	userService *users.UserService,
+	loanRepository *repositories.LoanRepository,
+) *LoanService {
+	return &LoanService{
+		prestamos:              []*models.Prestamo{},
+		indicePorID:            make(map[int]*models.Prestamo),
+		prestamoActivoPorLibro: make(map[int]*models.Prestamo),
+		siguienteID:            1,
+		bookService:            bookService,
+		userService:            userService,
+		loanRepository:         loanRepository,
 	}
 }
 
@@ -47,6 +66,20 @@ func (s *LoanService) RegistrarPrestamo(libroID int, usuarioID int) (*models.Pre
 		return nil, errors.New("El libro no esta disponible")
 	}
 
+	if s.loanRepository != nil {
+		prestamo, err := s.loanRepository.Crear(libro.ID(), usuario.ID())
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.bookService.PrestarLibro(libro.ID())
+		if err != nil {
+			return nil, err
+		}
+
+		return prestamo, nil
+	}
+
 	prestamo, err := models.NuevoPrestamo(s.siguienteID, libro.ID(), usuario.ID())
 	if err != nil {
 		return nil, err
@@ -67,10 +100,28 @@ func (s *LoanService) RegistrarPrestamo(libroID int, usuarioID int) (*models.Pre
 }
 
 func (s *LoanService) ListarPrestamos() []*models.Prestamo {
+	if s.loanRepository != nil {
+		prestamos, err := s.loanRepository.ListarTodos()
+		if err != nil {
+			return []*models.Prestamo{}
+		}
+
+		return prestamos
+	}
+
 	return s.prestamos
 }
 
 func (s *LoanService) ListarPrestamosActivos() []*models.Prestamo {
+	if s.loanRepository != nil {
+		prestamos, err := s.loanRepository.ListarActivos()
+		if err != nil {
+			return []*models.Prestamo{}
+		}
+
+		return prestamos
+	}
+
 	activos := []*models.Prestamo{}
 
 	for _, prestamo := range s.prestamos {
@@ -83,6 +134,10 @@ func (s *LoanService) ListarPrestamosActivos() []*models.Prestamo {
 }
 
 func (s *LoanService) BuscarPorID(id int) (*models.Prestamo, error) {
+	if s.loanRepository != nil {
+		return s.loanRepository.BuscarPorID(id)
+	}
+
 	prestamo, existe := s.indicePorID[id]
 	if !existe {
 		return nil, errors.New("Prestamo no encontrado")
@@ -101,6 +156,20 @@ func (s *LoanService) DevolverPrestamo(prestamoID int) error {
 		return errors.New("El prestamo ya fue devuelto")
 	}
 
+	if s.loanRepository != nil {
+		err := s.loanRepository.MarcarDevuelto(prestamoID)
+		if err != nil {
+			return err
+		}
+
+		err = s.bookService.DevolverLibro(prestamo.LibroID())
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
 	err = prestamo.Devolver()
 	if err != nil {
 		return err
@@ -117,6 +186,10 @@ func (s *LoanService) DevolverPrestamo(prestamoID int) error {
 }
 
 func (s *LoanService) BuscarPrestamoActivoPorLibro(libroID int) (*models.Prestamo, error) {
+	if s.loanRepository != nil {
+		return s.loanRepository.BuscarActivoPorLibro(libroID)
+	}
+
 	prestamo, existe := s.prestamoActivoPorLibro[libroID]
 	if !existe {
 		return nil, errors.New("No existe un prestamo activo para este libro")

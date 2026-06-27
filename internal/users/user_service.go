@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"go-digital-library/internal/models"
+	"go-digital-library/internal/repositories"
 )
 
 type UserService struct {
@@ -12,6 +13,7 @@ type UserService struct {
 	indicePorID     map[int]*models.Usuario
 	indicePorCorreo map[string]*models.Usuario
 	siguienteID     int
+	userRepository  *repositories.UserRepository
 }
 
 func NewUserService() *UserService {
@@ -20,11 +22,31 @@ func NewUserService() *UserService {
 		indicePorID:     make(map[int]*models.Usuario),
 		indicePorCorreo: make(map[string]*models.Usuario),
 		siguienteID:     1,
+		userRepository:  nil,
+	}
+}
+
+func NewUserDBService(userRepository *repositories.UserRepository) *UserService {
+	return &UserService{
+		usuarios:        []*models.Usuario{},
+		indicePorID:     make(map[int]*models.Usuario),
+		indicePorCorreo: make(map[string]*models.Usuario),
+		siguienteID:     1,
+		userRepository:  userRepository,
 	}
 }
 
 func (s *UserService) RegistrarUsuario(nombre string, correo string) (*models.Usuario, error) {
 	correo = strings.ToLower(strings.TrimSpace(correo))
+
+	if s.userRepository != nil {
+		_, err := s.userRepository.BuscarPorCorreo(correo)
+		if err == nil {
+			return nil, errors.New("Ya existe un usuario con este correo")
+		}
+
+		return s.userRepository.Crear(nombre, correo)
+	}
 
 	if _, existe := s.indicePorCorreo[correo]; existe {
 		return nil, errors.New("Ya existe un usuario con este correo")
@@ -44,10 +66,23 @@ func (s *UserService) RegistrarUsuario(nombre string, correo string) (*models.Us
 }
 
 func (s *UserService) ListarUsuarios() []*models.Usuario {
+	if s.userRepository != nil {
+		usuarios, err := s.userRepository.ListarTodos()
+		if err != nil {
+			return []*models.Usuario{}
+		}
+
+		return usuarios
+	}
+
 	return s.usuarios
 }
 
 func (s *UserService) BuscarPorID(id int) (*models.Usuario, error) {
+	if s.userRepository != nil {
+		return s.userRepository.BuscarPorID(id)
+	}
+
 	usuario, existe := s.indicePorID[id]
 	if !existe {
 		return nil, errors.New("Usuario no encontrado")
@@ -59,6 +94,10 @@ func (s *UserService) BuscarPorID(id int) (*models.Usuario, error) {
 func (s *UserService) BuscarPorCorreo(correo string) (*models.Usuario, error) {
 	correo = strings.ToLower(strings.TrimSpace(correo))
 
+	if s.userRepository != nil {
+		return s.userRepository.BuscarPorCorreo(correo)
+	}
+
 	usuario, existe := s.indicePorCorreo[correo]
 	if !existe {
 		return nil, errors.New("Usuario no encontrado")
@@ -68,6 +107,15 @@ func (s *UserService) BuscarPorCorreo(correo string) (*models.Usuario, error) {
 }
 
 func (s *UserService) BuscarPorTexto(texto string) []*models.Usuario {
+	if s.userRepository != nil {
+		usuarios, err := s.userRepository.BuscarPorTexto(texto)
+		if err != nil {
+			return []*models.Usuario{}
+		}
+
+		return usuarios
+	}
+
 	texto = strings.ToLower(strings.TrimSpace(texto))
 	resultados := []*models.Usuario{}
 
@@ -84,6 +132,10 @@ func (s *UserService) BuscarPorTexto(texto string) []*models.Usuario {
 }
 
 func (s *UserService) DesactivarUsuario(id int) error {
+	if s.userRepository != nil {
+		return s.userRepository.ActualizarEstado(id, false)
+	}
+
 	usuario, err := s.BuscarPorID(id)
 	if err != nil {
 		return err
@@ -94,6 +146,10 @@ func (s *UserService) DesactivarUsuario(id int) error {
 }
 
 func (s *UserService) ActivarUsuario(id int) error {
+	if s.userRepository != nil {
+		return s.userRepository.ActualizarEstado(id, true)
+	}
+
 	usuario, err := s.BuscarPorID(id)
 	if err != nil {
 		return err

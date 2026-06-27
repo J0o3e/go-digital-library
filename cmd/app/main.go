@@ -8,6 +8,7 @@ import (
 	"go-digital-library/internal/console"
 	"go-digital-library/internal/database"
 	"go-digital-library/internal/loans"
+	"go-digital-library/internal/repositories"
 	"go-digital-library/internal/users"
 )
 
@@ -23,9 +24,13 @@ func main() {
 
 	fmt.Println("Conexion a PostgreSQL exitosa.")
 
-	bookService := books.NewBookService()
-	userService := users.NewUserService()
-	loanService := loans.NewLoanService(bookService, userService)
+	bookRepository := repositories.NewBookRepository(db)
+	userRepository := repositories.NewUserRepository(db)
+	loanRepository := repositories.NewLoanRepository(db)
+
+	bookService := books.NewBookDBService(bookRepository)
+	userService := users.NewUserDBService(userRepository)
+	loanService := loans.NewLoanDBService(bookService, userService, loanRepository)
 
 	menu := console.NewMenu(bookService, userService, loanService)
 	menu.Ejecutar()
