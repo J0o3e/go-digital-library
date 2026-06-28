@@ -3,6 +3,11 @@ const bookForm = document.getElementById("bookForm");
 const message = document.getElementById("message");
 const reloadBooksButton = document.getElementById("reloadBooks");
 
+const usersTableBody = document.getElementById("usersTableBody");
+const userForm = document.getElementById("userForm");
+const userMessage = document.getElementById("userMessage");
+const reloadUsersButton = document.getElementById("reloadUsers");
+
 async function loadBooks() {
     try {
         const response = await fetch("/api/books");
@@ -40,6 +45,41 @@ async function loadBooks() {
     }
 }
 
+async function loadUsers() {
+    try {
+        const response = await fetch("/api/users");
+        const users = await response.json();
+
+        usersTableBody.innerHTML = "";
+
+        if (users.length === 0) {
+            usersTableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty">No hay usuarios registrados.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        users.forEach((user) => {
+            const row = document.createElement("tr");
+
+            const estado = user.activo ? "Activo" : "Inactivo";
+
+            row.innerHTML = `
+                <td>${user.id}</td>
+                <td>${user.nombre}</td>
+                <td>${user.correo}</td>
+                <td>${estado}</td>
+            `;
+
+            usersTableBody.appendChild(row);
+        });
+    } catch (error) {
+        userMessage.textContent = "Error al cargar usuarios.";
+    }
+}
+
 bookForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
@@ -74,6 +114,41 @@ bookForm.addEventListener("submit", async function (event) {
     }
 });
 
+userForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const user = {
+        nombre: document.getElementById("nombre").value,
+        correo: document.getElementById("correo").value
+    };
+
+    try {
+        const response = await fetch("/api/users", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(user)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            userMessage.textContent = data.error || "Error al registrar usuario.";
+            return;
+        }
+
+        userMessage.textContent = "Usuario registrado correctamente.";
+        userForm.reset();
+        loadUsers();
+    } catch (error) {
+        userMessage.textContent = "Error al conectar con la API.";
+    }
+});
+
 reloadBooksButton.addEventListener("click", loadBooks);
+reloadUsersButton.addEventListener("click", loadUsers);
 
 loadBooks();
+loadUsers();
+
