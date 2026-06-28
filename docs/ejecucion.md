@@ -225,3 +225,42 @@ El comando principal para ejecutar el sistema es:
 ```bash
 go run ./cmd/app
 ```
+## Acceso al frontend web
+
+Después de ejecutar el proyecto con:
+
+```bash
+go run ./cmd/app
+
+abrir en el navegador:
+
+http://localhost:8080
+
+Desde esta interfaz web se pueden realizar las siguientes acciones:
+
+Registrar libros.
+Listar libros.
+Registrar usuarios.
+Listar usuarios.
+Registrar préstamos.
+Listar préstamos activos.
+Devolver préstamos.
+Consultar historial de préstamos.
+Acceso a los servicios web JSON
+
+Además del frontend, el sistema expone servicios web en formato JSON.
+
+Algunos servicios disponibles son:
+
+GET  http://localhost:8080/api/books
+POST http://localhost:8080/api/books
+GET  http://localhost:8080/api/users
+POST http://localhost:8080/api/users
+POST http://localhost:8080/api/loans
+GET  http://localhost:8080/api/loans/active
+GET  http://localhost:8080/api/loans/history
+POST http://localhost:8080/api/loans/return
+
+La documentación completa de la API se encuentra en:
+
+docs/api.md
