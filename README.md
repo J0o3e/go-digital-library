@@ -73,3 +73,11 @@ go-digital-library/
 ├── go.mod
 └── README.md
 
+## Servicios Web JSON
+
+El proyecto incluye una API con servicios web que responden en formato JSON.
+
+La documentación de los servicios se encuentra en:
+
+[docs/api.md](docs/api.md)
+
