@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
+	"go-digital-library/internal/api"
 	"go-digital-library/internal/books"
 	"go-digital-library/internal/config"
-	"go-digital-library/internal/console"
 	"go-digital-library/internal/database"
 	"go-digital-library/internal/loans"
 	"go-digital-library/internal/repositories"
@@ -32,6 +32,11 @@ func main() {
 	userService := users.NewUserDBService(userRepository)
 	loanService := loans.NewLoanDBService(bookService, userService, loanRepository)
 
-	menu := console.NewMenu(bookService, userService, loanService)
-	menu.Ejecutar()
+	server := api.NewServer(bookService, userService, loanService)
+
+	err = server.Start()
+	if err != nil {
+		fmt.Println("Error al iniciar API:", err)
+		return
+	}
 }
