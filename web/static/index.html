@@ -91,6 +91,67 @@
                 </tbody>
             </table>
         </section>
+
+        <section class="card">
+            <h2>Registrar préstamo</h2>
+
+            <form id="loanForm">
+                <label for="libroId">ID del libro</label>
+                <input type="number" id="libroId" required>
+
+                <label for="usuarioId">ID del usuario</label>
+                <input type="number" id="usuarioId" required>
+
+                <button type="submit">Registrar préstamo</button>
+            </form>
+
+            <p id="loanMessage"></p>
+        </section>
+
+        <section class="card">
+            <div class="section-header">
+                <h2>Préstamos activos</h2>
+                <button id="reloadActiveLoans">Actualizar</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Libro</th>
+                        <th>Usuario</th>
+                        <th>Fecha préstamo</th>
+                        <th>Fecha devolución</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="activeLoansTableBody">
+                </tbody>
+            </table>
+        </section>
+
+        <section class="card">
+            <div class="section-header">
+                <h2>Historial de préstamos</h2>
+                <button id="reloadLoanHistory">Actualizar</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Libro</th>
+                        <th>Usuario</th>
+                        <th>Fecha préstamo</th>
+                        <th>Fecha devolución</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="loanHistoryTableBody">
+                </tbody>
+            </table>
+        </section>
     </main>
 
     <script src="/static/app.js"></script>

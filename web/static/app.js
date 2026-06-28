@@ -8,6 +8,13 @@ const userForm = document.getElementById("userForm");
 const userMessage = document.getElementById("userMessage");
 const reloadUsersButton = document.getElementById("reloadUsers");
 
+const loanForm = document.getElementById("loanForm");
+const loanMessage = document.getElementById("loanMessage");
+const activeLoansTableBody = document.getElementById("activeLoansTableBody");
+const loanHistoryTableBody = document.getElementById("loanHistoryTableBody");
+const reloadActiveLoansButton = document.getElementById("reloadActiveLoans");
+const reloadLoanHistoryButton = document.getElementById("reloadLoanHistory");
+
 async function loadBooks() {
     try {
         const response = await fetch("/api/books");
@@ -80,6 +87,83 @@ async function loadUsers() {
     }
 }
 
+async function loadActiveLoans() {
+    try {
+        const response = await fetch("/api/loans/active");
+        const loans = await response.json();
+
+        activeLoansTableBody.innerHTML = "";
+
+        if (loans.length === 0) {
+            activeLoansTableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty">No hay préstamos activos.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        loans.forEach((loan) => {
+            const row = document.createElement("tr");
+
+            const estado = loan.activo ? "Activo" : "Devuelto";
+
+            row.innerHTML = `
+                <td>${loan.id}</td>
+                <td>${loan.libro_titulo}</td>
+                <td>${loan.usuario_nombre}</td>
+                <td>${loan.fecha_prestamo}</td>
+                <td>${loan.fecha_devolucion}</td>
+                <td>${estado}</td>
+                <td>
+                    <button onclick="returnLoan(${loan.id})">Devolver</button>
+                </td>
+            `;
+
+            activeLoansTableBody.appendChild(row);
+        });
+    } catch (error) {
+        loanMessage.textContent = "Error al cargar préstamos activos.";
+    }
+}
+
+async function loadLoanHistory() {
+    try {
+        const response = await fetch("/api/loans/history");
+        const loans = await response.json();
+
+        loanHistoryTableBody.innerHTML = "";
+
+        if (loans.length === 0) {
+            loanHistoryTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty">No hay préstamos registrados.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        loans.forEach((loan) => {
+            const row = document.createElement("tr");
+
+            const estado = loan.activo ? "Activo" : "Devuelto";
+
+            row.innerHTML = `
+                <td>${loan.id}</td>
+                <td>${loan.libro_titulo}</td>
+                <td>${loan.usuario_nombre}</td>
+                <td>${loan.fecha_prestamo}</td>
+                <td>${loan.fecha_devolucion}</td>
+                <td>${estado}</td>
+            `;
+
+            loanHistoryTableBody.appendChild(row);
+        });
+    } catch (error) {
+        loanMessage.textContent = "Error al cargar historial de préstamos.";
+    }
+}
+
 bookForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
@@ -146,9 +230,78 @@ userForm.addEventListener("submit", async function (event) {
     }
 });
 
+loanForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const loan = {
+        libro_id: Number(document.getElementById("libroId").value),
+        usuario_id: Number(document.getElementById("usuarioId").value)
+    };
+
+    try {
+        const response = await fetch("/api/loans", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(loan)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            loanMessage.textContent = data.error || "Error al registrar préstamo.";
+            return;
+        }
+
+        loanMessage.textContent = "Préstamo registrado correctamente.";
+        loanForm.reset();
+
+        loadBooks();
+        loadActiveLoans();
+        loadLoanHistory();
+    } catch (error) {
+        loanMessage.textContent = "Error al conectar con la API.";
+    }
+});
+
+async function returnLoan(prestamoId) {
+    try {
+        const response = await fetch("/api/loans/return", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                prestamo_id: prestamoId
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            loanMessage.textContent = data.error || "Error al devolver préstamo.";
+            return;
+        }
+
+        loanMessage.textContent = data.message || "Préstamo devuelto correctamente.";
+
+        loadBooks();
+        loadActiveLoans();
+        loadLoanHistory();
+    } catch (error) {
+        loanMessage.textContent = "Error al conectar con la API.";
+    }
+}
+
 reloadBooksButton.addEventListener("click", loadBooks);
 reloadUsersButton.addEventListener("click", loadUsers);
+reloadActiveLoansButton.addEventListener("click", loadActiveLoans);
+reloadLoanHistoryButton.addEventListener("click", loadLoanHistory);
 
 loadBooks();
 loadUsers();
+loadActiveLoans();
+loadLoanHistory();
+
 
